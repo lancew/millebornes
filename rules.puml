@@ -1,0 +1,86 @@
+@startuml Mille Bornes Game Rules
+
+skinparam backgroundColor #EEEBDC
+skinparam handwritten true
+
+title Mille Bornes Game Rules
+
+package "Deck Components" {
+  [Hazards] as hazards
+  [Remedies] as remedies
+  [Safeties] as safeties
+  [Distance Cards] as distance
+}
+
+package "Game Setup" {
+  [4 Players] as players
+  [2 Teams] as teams
+  [6 Cards per Player] as hand
+  [1000 km Goal] as goal
+}
+
+package "Turn Actions" {
+  [Draw Card] as draw
+  [Play Card] as play
+  [Discard] as discard
+}
+
+package "Tableau Areas" {
+  [Battle] as battle
+  [Speed] as speed
+  [Distance] as dist
+  [Safety] as safe
+}
+
+package "Special Rules" {
+  [Coup Fourré] as coup
+  [Extension] as extension
+}
+
+package "Scoring" {
+  [Distance Points] as distPoints
+  [Safety Bonuses] as safetyBonus
+  [Trip Completion] as tripComplete
+  [Other Bonuses] as otherBonus
+}
+
+players --> teams : form
+teams --> hand : receive
+hand --> play : use cards from
+play --> battle : Hazards & Remedies
+play --> speed : Speed Limit & End of Limit
+play --> dist : Distance cards
+play --> safe : Safety cards
+
+hazards --> play
+remedies --> play
+safeties --> play
+distance --> play
+
+draw --> hand : add card
+hand --> discard : remove card
+
+coup --> safetyBonus : awards points
+extension --> goal : extends to 1000 km
+
+distPoints --> Scoring
+safetyBonus --> Scoring
+tripComplete --> Scoring
+otherBonus --> Scoring
+
+note bottom of goal
+  First to exactly 1000 km wins the hand
+  Game ends when a team reaches 5000 points
+end note
+
+note right of coup
+  Play Safety immediately when
+  opponent plays matching Hazard
+end note
+
+note right of extension
+  At 700 km, player can choose to
+  extend the race to 1000 km
+end note
+
+@enduml
