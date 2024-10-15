@@ -12,6 +12,8 @@ install dependencies with `carmel install`
 
 run game with `carmel exec perl game.pl`
 
+A lot of this code is being produced by AI, this is an experiment in how well it does.
+
 ---
 
 Mille Bornes (also Mille Bournes) is a French card game. In the United States, Mille Bornes is published by Parker Brothers and is commonly available in game stores, as well as toy stores and department store]]s. There are also several computer-based versions. It is believed to be based on Touring (card game)|Touring, an earlier American card game.
