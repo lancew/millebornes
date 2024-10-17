@@ -5,7 +5,7 @@ use Game::Deckar;
 
 has 'target_distance' => (
     is      => 'ro',
-    default => 1000,
+    default => 300,
 );
 
 has 'hazards' => (

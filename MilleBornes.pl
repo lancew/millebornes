@@ -52,8 +52,6 @@ while ( !$game_over ) {
     DISPLAY:
         print "Distance: $players{$player}{distance}\n";
 
-        print Dumper( \%players );
-
         print "Can move: "
             . ( $players{$player}{can_move} ? "Yes" : "No" ) . "\n";
 
@@ -92,6 +90,8 @@ while ( !$game_over ) {
             $players{$player}{can_move} = 1;
             print "$player rolled the dice and can move again.\n";
             $game->pick( $player => 'discard', [ $choice - 1 ] );
+            my $hand  = $game->get($player);
+            goto SKIP_TO_THE_END;
         }
 
         if ( $played_card =~ / KM$/ ) {
@@ -111,6 +111,7 @@ while ( !$game_over ) {
                 "$player played $played_card. Total distance: $players{$player}{distance}\n";
 
             $game->pick( $player => 'discard', [ $choice - 1 ] );
+            goto SKIP_TO_THE_END;
         }
 
         if ( $played_card eq 'Stop' || $played_card eq 'Speed Limit' ) {
@@ -121,6 +122,7 @@ while ( !$game_over ) {
                 $players{$opponent}{can_move} = 0
                     if $played_card eq 'Stop';
                 $game->pick( $player => 'discard', [ $choice - 1 ] );
+                goto SKIP_TO_THE_END;
             }
             else {
                 print
@@ -135,6 +137,7 @@ while ( !$game_over ) {
                 $players{$opponent}{can_move} = 0;
                 print "$opponent is out of gas and cannot move!\n";
                 $game->pick( $player => 'discard', [ $choice - 1 ] );
+                goto SKIP_TO_THE_END;
             }
             else {
                 print
@@ -149,6 +152,7 @@ while ( !$game_over ) {
                 $players{$opponent}{can_move} = 0;
                 print "$opponent has a flat tire and cannot move!\n";
                 $game->pick( $player => 'discard', [ $choice - 1 ] );
+                goto SKIP_TO_THE_END;
             }
             else {
                 print
@@ -163,6 +167,7 @@ while ( !$game_over ) {
                 $players{$opponent}{can_move} = 0;
                 print "$opponent has been in an Accident and cannot move!\n";
                 $game->pick( $player => 'discard', [ $choice - 1 ] );
+                goto SKIP_TO_THE_END;
             }
             else {
                 print
@@ -189,14 +194,16 @@ while ( !$game_over ) {
             my $discarded_card = $hand[ $choice - 1 ];
             $game->pick( $player => 'discard', [ $choice - 1 ] );
             print "$player discarded $discarded_card\n";
+
+            my $hand  = $game->get($player);
+            warn Dumper $hand;
         }
 
+    SKIP_TO_THE_END:
         if ( $players{$player}{distance} >= $target_distance ) {
             $game_over = 1;
             last;
         }
-
-        $game->pick( 'pile' => $player, [0] );
     }
 }
 
