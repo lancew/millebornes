@@ -90,7 +90,7 @@ while ( !$game_over ) {
             $players{$player}{can_move} = 1;
             print "$player rolled the dice and can move again.\n";
             $game->pick( $player => 'discard', [ $choice - 1 ] );
-            my $hand  = $game->get($player);
+            my $hand = $game->get($player);
             goto SKIP_TO_THE_END;
         }
 
@@ -195,7 +195,7 @@ while ( !$game_over ) {
             $game->pick( $player => 'discard', [ $choice - 1 ] );
             print "$player discarded $discarded_card\n";
 
-            my $hand  = $game->get($player);
+            my $hand = $game->get($player);
             warn Dumper $hand;
         }
 
