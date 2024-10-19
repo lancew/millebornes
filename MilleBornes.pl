@@ -36,13 +36,10 @@ for ( 1 .. 6 ) {
 
 my $game_over = 0;
 
-print "Race to $target_distance km\n";
-
 while ( !$game_over ) {
     for my $player ( sort keys %players ) {
 
         my $opponent = ( $player eq 'Player 1' ) ? 'Player 2' : 'Player 1';
-        print "\n$player\'s turn:\n";
 
         my ( $cards, $undo ) = $game->pick( 'pile' => $player, [0] );
         for my $c (@$cards) {
@@ -50,14 +47,11 @@ while ( !$game_over ) {
         }
 
     DISPLAY:
-        print "Distance: $players{$player}{distance}\n";
-
-        print "Can move: "
-            . ( $players{$player}{can_move} ? "Yes" : "No" ) . "\n";
+        _display_header( $player, \%players );
 
         my @hand = @{ $game->get($player) };
         push @hand, 'Discard';
-        print "$player\'s hand: " . join( ", ", @hand ) . "\n";
+        #print "$player\'s hand: " . join( ", ", @hand ) . "\n";
 
         print "Choose a card to play (enter the number): \n";
         for my $i ( 0 .. $#hand ) {
@@ -212,5 +206,19 @@ my $winner = (
         keys %players
 )[0];
 print "$winner has won the game!\n";
+
+sub _display_header {
+    my ( $player, $players ) = @_;
+    system('clear');
+
+    print "Race to $target_distance km\n\n";
+
+    print "\n$player\'s turn:\n";
+    print "Distance: $players->{$player}{distance}\n";
+
+    print "Can move: "
+        . ( $players->{$player}{can_move} ? "Yes" : "No" ) . "\n";
+
+}
 
 1;

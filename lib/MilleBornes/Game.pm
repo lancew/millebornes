@@ -3,9 +3,10 @@ package MilleBornes::Game;
 use Moo;
 use Game::Deckar;
 
+
 has 'target_distance' => (
     is      => 'ro',
-    default => 300,
+    default => 1000,
 );
 
 has 'hazards' => (
