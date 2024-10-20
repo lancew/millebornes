@@ -21,6 +21,7 @@ my @remedy_cards   = @{ $mb_game->remedies };
 my @safety_cards   = @{ $mb_game->safeties };
 
 my $game = $mb_game->deck;
+my $message; # for messages displayed to the user
 
 my %players = %{ $mb_game->players };
 
@@ -49,6 +50,13 @@ while ( !$game_over ) {
     DISPLAY:
         _display_header( $player, \%players );
 
+        if ( $message ) {
+            print "\n";
+            print $message;
+            print "\n\n";
+            $message = undef;
+        }
+
         my @hand = @{ $game->get($player) };
         push @hand, 'Discard';
         #print "$player\'s hand: " . join( ", ", @hand ) . "\n";
@@ -73,16 +81,14 @@ while ( !$game_over ) {
             if ( !grep { $_ eq $played_card }
                 ( @safety_cards, @hazard_cards, 'Roll', 'Discard' ) )
             {
-                print
-                    "\nYou cannot play this card when you cannot move. You need to play a 'Roll' card or a Safety card.\n";
-                print "Please choose another card.\n";
+                $message =
+                    "You cannot play this card when you cannot move. You need to play a 'Roll' card or a Safety card.";
                 goto DISPLAY;
             }
         }
 
         if ( $played_card eq 'Roll' ) {
             $players{$player}{can_move} = 1;
-            print "$player rolled the dice and can move again.\n";
             $game->pick( $player => 'discard', [ $choice - 1 ] );
             my $hand = $game->get($player);
             goto SKIP_TO_THE_END;
@@ -94,15 +100,12 @@ while ( !$game_over ) {
 
             if ( $players{$player}{distance} + $distance > $target_distance )
             {
-                print
-                    "\n\nCannot play this distance card. It would exceed the target distance.\n\n";
-                print "Please choose another card.\n";
+                $message =
+                    "\Cannot play this distance card. It would exceed the target distance.";
                 goto DISPLAY;
             }
 
             $players{$player}{distance} += $distance;
-            print
-                "$player played $played_card. Total distance: $players{$player}{distance}\n";
 
             $game->pick( $player => 'discard', [ $choice - 1 ] );
             goto SKIP_TO_THE_END;
@@ -116,10 +119,12 @@ while ( !$game_over ) {
                 $players{$opponent}{can_move} = 0
                     if $played_card eq 'Stop';
                 $game->pick( $player => 'discard', [ $choice - 1 ] );
+
+                $message = "$opponent has been stopped.";
                 goto SKIP_TO_THE_END;
             }
             else {
-                print
+                $message =
                     "$opponent is protected by Right of Way. Hazard not applied.\n";
             }
         }
@@ -129,7 +134,7 @@ while ( !$game_over ) {
             {
                 push @{ $players{$opponent}{hazards} }, $played_card;
                 $players{$opponent}{can_move} = 0;
-                print "$opponent is out of gas and cannot move!\n";
+                $message = "$opponent is out of gas and cannot move!";
                 $game->pick( $player => 'discard', [ $choice - 1 ] );
                 goto SKIP_TO_THE_END;
             }
@@ -144,12 +149,12 @@ while ( !$game_over ) {
             {
                 push @{ $players{$opponent}{hazards} }, $played_card;
                 $players{$opponent}{can_move} = 0;
-                print "$opponent has a flat tire and cannot move!\n";
+                $message = "$opponent has a flat tire and cannot move!";
                 $game->pick( $player => 'discard', [ $choice - 1 ] );
                 goto SKIP_TO_THE_END;
             }
             else {
-                print
+                $message =
                     "$opponent is protected by Puncture-proof. Hazard not applied.\n";
             }
         }
@@ -159,12 +164,12 @@ while ( !$game_over ) {
             {
                 push @{ $players{$opponent}{hazards} }, $played_card;
                 $players{$opponent}{can_move} = 0;
-                print "$opponent has been in an Accident and cannot move!\n";
+                $message = "$opponent has been in an Accident and cannot move!";
                 $game->pick( $player => 'discard', [ $choice - 1 ] );
                 goto SKIP_TO_THE_END;
             }
             else {
-                print
+                $message =
                     "$opponent is protected by Driving Ace. Hazard not applied.\n";
             }
         }
@@ -212,6 +217,8 @@ sub _display_header {
     system('clear');
 
     print "Race to $target_distance km\n\n";
+    print "Player 1: $players->{'Player 1'}{distance} km\n";
+    print "Player 2: $players->{'Player 2'}{distance} km\n";
 
     print "\n$player\'s turn:\n";
     print "Distance: $players->{$player}{distance}\n";
