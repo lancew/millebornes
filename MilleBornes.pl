@@ -21,7 +21,7 @@ my @remedy_cards   = @{ $mb_game->remedies };
 my @safety_cards   = @{ $mb_game->safeties };
 
 my $game = $mb_game->deck;
-my $message; # for messages displayed to the user
+my $message;    # for messages displayed to the user
 
 my %players = %{ $mb_game->players };
 
@@ -50,7 +50,7 @@ while ( !$game_over ) {
     DISPLAY:
         _display_header( $player, \%players );
 
-        if ( $message ) {
+        if ($message) {
             print "\n";
             print $message;
             print "\n\n";
@@ -81,8 +81,8 @@ while ( !$game_over ) {
             if ( !grep { $_ eq $played_card }
                 ( @safety_cards, @hazard_cards, 'Roll', 'Discard' ) )
             {
-                $message =
-                    "You cannot play this card when you cannot move. You need to play a 'Roll' card or a Safety card.";
+                $message
+                    = "You cannot play this card when you cannot move. You need to play a 'Roll' card or a Safety card.";
                 goto DISPLAY;
             }
         }
@@ -100,8 +100,8 @@ while ( !$game_over ) {
 
             if ( $players{$player}{distance} + $distance > $target_distance )
             {
-                $message =
-                    "\Cannot play this distance card. It would exceed the target distance.";
+                $message
+                    = "\Cannot play this distance card. It would exceed the target distance.";
                 goto DISPLAY;
             }
 
@@ -124,8 +124,9 @@ while ( !$game_over ) {
                 goto SKIP_TO_THE_END;
             }
             else {
-                $message =
-                    "$opponent is protected by Right of Way. Hazard not applied.\n";
+                $message
+                    = "$opponent is protected by Right of Way. Hazard not applied.\n";
+                goto SKIP_TO_THE_END;
             }
         }
         elsif ( $played_card eq 'Out of Gas' ) {
@@ -139,8 +140,9 @@ while ( !$game_over ) {
                 goto SKIP_TO_THE_END;
             }
             else {
-                print
-                    "$opponent is protected by Extra Tank. Hazard not applied.\n";
+                $message
+                    = "$opponent is protected by Extra Tank. Hazard not applied.\n";
+                goto SKIP_TO_THE_END;
             }
         }
         elsif ( $played_card eq 'Flat Tire' ) {
@@ -154,8 +156,9 @@ while ( !$game_over ) {
                 goto SKIP_TO_THE_END;
             }
             else {
-                $message =
-                    "$opponent is protected by Puncture-proof. Hazard not applied.\n";
+                $message
+                    = "$opponent is protected by Puncture-proof. Hazard not applied.\n";
+                goto DISPLAY;
             }
         }
         elsif ( $played_card eq 'Accident' ) {
@@ -164,13 +167,15 @@ while ( !$game_over ) {
             {
                 push @{ $players{$opponent}{hazards} }, $played_card;
                 $players{$opponent}{can_move} = 0;
-                $message = "$opponent has been in an Accident and cannot move!";
+                $message
+                    = "$opponent has been in an Accident and cannot move!";
                 $game->pick( $player => 'discard', [ $choice - 1 ] );
                 goto SKIP_TO_THE_END;
             }
             else {
-                $message =
-                    "$opponent is protected by Driving Ace. Hazard not applied.\n";
+                $message
+                    = "$opponent is protected by Driving Ace. Hazard not applied.\n";
+                goto DISPLAY;
             }
         }
 
@@ -219,6 +224,15 @@ sub _display_header {
     print "Race to $target_distance km\n\n";
     print "Player 1: $players->{'Player 1'}{distance} km\n";
     print "Player 2: $players->{'Player 2'}{distance} km\n";
+
+    print "\nSafety cards:";
+    print join( ", ", @{ $players->{$player}{safety} } ) || "None";
+
+    print "\nRemedy cards:";
+    print join( ", ", @{ $players->{$player}{remedies} } ) || "None";
+
+    print "\nHazards:";
+    print join( ", ", @{ $players->{$player}{hazards} } ) || "None";
 
     print "\n$player\'s turn:\n";
     print "Distance: $players->{$player}{distance}\n";
