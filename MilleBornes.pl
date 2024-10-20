@@ -77,22 +77,36 @@ while ( !$game_over ) {
 
         my $played_card = $hand[ $choice - 1 ];
 
-        if ( !$players{$player}{can_move} ) {
-            if ( !grep { $_ eq $played_card }
-                ( @safety_cards, @hazard_cards, 'Roll', 'Discard' ) )
-            {
-                $message
-                    = "You cannot play this card when you cannot move. You need to play a 'Roll' card or a Safety card.";
+        if ( $played_card =~ /^(\d+) KM$/ ) {
+            my $distance = $1;
+            
+            # Check if player can move
+            unless ( $players{$player}{can_move} ) {
+                $message = "You cannot play a distance card when you're not allowed to move.";
                 goto DISPLAY;
             }
-        }
-
-        if ( $played_card eq 'Roll' ) {
-            $players{$player}{can_move} = 1;
+            
+            # Check for Speed Limit
+            if ( grep { $_ eq 'Speed Limit' } @{ $players{$player}{hazards} } ) {
+                if ( $distance > 50 ) {
+                    $message = "You can't play a distance card greater than 50 KM due to Speed Limit.";
+                    goto DISPLAY;
+                }
+            }
+            
+            # Check if it would exceed target distance
+            if ( $players{$player}{distance} + $distance > $target_distance ) {
+                $message = "Cannot play this distance card. It would exceed the target distance.";
+                goto DISPLAY;
+            }
+            
+            # Play the distance card
+            $players{$player}{distance} += $distance;
             $game->pick( $player => 'discard', [ $choice - 1 ] );
-            my $hand = $game->get($player);
+            $message = "$player moved $distance KM. Total distance: $players{$player}{distance} KM.";
             goto SKIP_TO_THE_END;
         }
+
 
         if ( $played_card =~ / KM$/ ) {
 
@@ -129,7 +143,8 @@ while ( !$game_over ) {
                 goto SKIP_TO_THE_END;
             }
         }
-        elsif ( $played_card eq 'Out of Gas' ) {
+        
+        if ( $played_card eq 'Out of Gas' ) {
             unless ( grep { $_ eq 'Extra Tank' }
                 @{ $players{$opponent}{safety} } )
             {
@@ -145,7 +160,8 @@ while ( !$game_over ) {
                 goto SKIP_TO_THE_END;
             }
         }
-        elsif ( $played_card eq 'Flat Tire' ) {
+        
+        if ( $played_card eq 'Flat Tire' ) {
             unless ( grep { $_ eq 'Puncture-proof' }
                 @{ $players{$opponent}{safety} } )
             {
@@ -161,7 +177,8 @@ while ( !$game_over ) {
                 goto DISPLAY;
             }
         }
-        elsif ( $played_card eq 'Accident' ) {
+        
+        if ( $played_card eq 'Accident' ) {
             unless ( grep { $_ eq 'Driving Ace' }
                 @{ $players{$opponent}{safety} } )
             {
@@ -179,6 +196,124 @@ while ( !$game_over ) {
             }
         }
 
+        if ( $played_card eq 'Repairs' ) {
+            if ( grep { $_ eq 'Accident' } @{ $players{$player}{hazards} } ) {
+                @{ $players{$player}{hazards} } = grep { $_ ne 'Accident' } @{ $players{$player}{hazards} };
+                $players{$player}{can_move} = 1;
+                $message = "$player has repaired their car and can now move!";
+                $game->pick( $player => 'discard', [ $choice - 1 ] );
+                goto SKIP_TO_THE_END;
+            } else {
+                $message = "You don't have an Accident to repair.";
+                goto DISPLAY;
+            }
+        }
+
+        if ( $played_card eq 'Gasoline' ) {
+            if ( grep { $_ eq 'Out of Gas' } @{ $players{$player}{hazards} } ) {
+                @{ $players{$player}{hazards} } = grep { $_ ne 'Out of Gas' } @{ $players{$player}{hazards} };
+                $players{$player}{can_move} = 1;
+                $message = "$player has refueled their car and can now move!";
+                $game->pick( $player => 'discard', [ $choice - 1 ] );
+                goto SKIP_TO_THE_END;
+            } else {
+                $message = "You don't need Gasoline right now.";
+                goto DISPLAY;
+            }
+        }
+
+        if ( $played_card eq 'Spare Tire' ) {
+            if ( grep { $_ eq 'Flat Tire' } @{ $players{$player}{hazards} } ) {
+                @{ $players{$player}{hazards} } = grep { $_ ne 'Flat Tire' } @{ $players{$player}{hazards} };
+                $players{$player}{can_move} = 1;
+                $message = "$player has changed their tire and can now move!";
+                $game->pick( $player => 'discard', [ $choice - 1 ] );
+                goto SKIP_TO_THE_END;
+            } else {
+                $message = "You don't have a Flat Tire to fix.";
+                goto DISPLAY;
+            }
+        }
+
+        if ( $played_card eq 'End of Limit' ) {
+            if ( grep { $_ eq 'Speed Limit' } @{ $players{$player}{hazards} } ) {
+                @{ $players{$player}{hazards} } = grep { $_ ne 'Speed Limit' } @{ $players{$player}{hazards} };
+                $message = "$player is no longer under a Speed Limit!";
+                $game->pick( $player => 'discard', [ $choice - 1 ] );
+                goto SKIP_TO_THE_END;
+            } else {
+                $message = "You're not under a Speed Limit.";
+                goto DISPLAY;
+            }
+        }
+
+        if ( $played_card eq 'Roll' ) {
+            if ( grep { $_ eq 'Stop' } @{ $players{$player}{hazards} } ) {
+                @{ $players{$player}{hazards} } = grep { $_ ne 'Stop' } @{ $players{$player}{hazards} };
+                $players{$player}{can_move} = 1;
+                $message = "$player can now move!";
+                $game->pick( $player => 'discard', [ $choice - 1 ] );
+                goto SKIP_TO_THE_END;
+            } elsif (!$players{$player}{can_move}) {
+                $players{$player}{can_move} = 1;
+                $message = "$player can now move!";
+                $game->pick( $player => 'discard', [ $choice - 1 ] );
+                goto SKIP_TO_THE_END;
+            } else {
+                $message = "You don't need to play Roll right now.";
+                goto DISPLAY;
+            }
+        }
+
+        if ( $played_card eq 'Driving Ace' ) {
+            if (!grep { $_ eq 'Driving Ace' } @{ $players{$player}{safety} }) {
+                push @{ $players{$player}{safety} }, 'Driving Ace';
+                $message = "$player is now protected against Accidents!";
+                $game->pick( $player => 'discard', [ $choice - 1 ] );
+                goto SKIP_TO_THE_END;
+            } else {
+                $message = "You already have the Driving Ace safety card.";
+                goto DISPLAY;
+            }
+        }
+
+        if ( $played_card eq 'Extra Tank' ) {
+            if (!grep { $_ eq 'Extra Tank' } @{ $players{$player}{safety} }) {
+                push @{ $players{$player}{safety} }, 'Extra Tank';
+                $message = "$player is now protected against running Out of Gas!";
+                $game->pick( $player => 'discard', [ $choice - 1 ] );
+                goto SKIP_TO_THE_END;
+            } else {
+                $message = "You already have the Extra Tank safety card.";
+                goto DISPLAY;
+            }
+        }
+
+        if ( $played_card eq 'Puncture-Proof' ) {
+            if (!grep { $_ eq 'Puncture-Proof' } @{ $players{$player}{safety} }) {
+                push @{ $players{$player}{safety} }, 'Puncture-Proof';
+                $message = "$player is now protected against Flat Tires!";
+                $game->pick( $player => 'discard', [ $choice - 1 ] );
+                goto SKIP_TO_THE_END;
+            } else {
+                $message = "You already have the Puncture-Proof safety card.";
+                goto DISPLAY;
+            }
+        }
+
+        if ( $played_card eq 'Right of Way' ) {
+            if (!grep { $_ eq 'Right of Way' } @{ $players{$player}{safety} }) {
+                push @{ $players{$player}{safety} }, 'Right of Way';
+                $message = "$player is now protected against Speed Limits and Stops!";
+                $game->pick( $player => 'discard', [ $choice - 1 ] );
+                goto SKIP_TO_THE_END;
+            } else {
+                $message = "You already have the Right of Way safety card.";
+                goto DISPLAY;
+            }
+        }
+
+        # ------------------------------------------------------------  
         if ( scalar( @{ $game->get($player) } ) > 6 ) {
             print "Choose a card to discard (enter the number): \n";
             @hand = @{ $game->get($player) };
@@ -234,7 +369,7 @@ sub _display_header {
     print "\nHazards:";
     print join( ", ", @{ $players->{$player}{hazards} } ) || "None";
 
-    print "\n$player\'s turn:\n";
+    print "\n\n$player\'s turn:\n\n";
     print "Distance: $players->{$player}{distance}\n";
 
     print "Can move: "
