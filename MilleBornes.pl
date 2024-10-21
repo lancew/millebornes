@@ -248,12 +248,15 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Roll' ) {
-            if ( grep { $_ eq 'Stop' } @{ $players{$player}{hazards} } ) {
-                @{ $players{$player}{hazards} } = grep { $_ ne 'Stop' } @{ $players{$player}{hazards} };
+            if ( @{ $players{$player}{hazards} } == 1 && $players{$player}{hazards}[0] eq 'Stop' ) {
+                @{ $players{$player}{hazards} } = ();
                 $players{$player}{can_move} = 1;
                 $message = "$player can now move!";
                 $game->pick( $player => 'discard', [ $choice - 1 ] );
                 goto SKIP_TO_THE_END;
+            } elsif (@{ $players{$player}{hazards} } > 1 || (@{ $players{$player}{hazards} } == 1 && $players{$player}{hazards}[0] ne 'Stop')) {
+                $message = "You can't play Roll when you have other hazards besides Stop.";
+                goto DISPLAY;
             } elsif (!$players{$player}{can_move}) {
                 $players{$player}{can_move} = 1;
                 $message = "$player can now move!";
