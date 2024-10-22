@@ -140,7 +140,7 @@ while ( !$game_over ) {
             else {
                 $message
                     = "$opponent is protected by Right of Way. Hazard not applied.\n";
-                goto SKIP_TO_THE_END;
+                goto DISPLAY;
             }
         }
         
@@ -157,7 +157,7 @@ while ( !$game_over ) {
             else {
                 $message
                     = "$opponent is protected by Extra Tank. Hazard not applied.\n";
-                goto SKIP_TO_THE_END;
+                goto DISPLAY;
             }
         }
         
@@ -317,7 +317,7 @@ while ( !$game_over ) {
         }
 
         # ------------------------------------------------------------  
-        if ( scalar( @{ $game->get($player) } ) > 6 ) {
+        while ( scalar( @{ $game->get($player) } ) > 6 ) {
             print "Choose a card to discard (enter the number): \n";
             @hand = @{ $game->get($player) };
 
