@@ -214,7 +214,7 @@ while ( !$game_over ) {
             if ( grep { $_ eq 'Accident' } @{ $players{$player}{hazards} } ) {
                 @{ $players{$player}{hazards} } = grep { $_ ne 'Accident' }
                     @{ $players{$player}{hazards} };
-                $players{$player}{can_move} = 1;
+                $players{$player}{can_move} = 0;
                 $message = "$player has repaired their car and can now move!";
                 $game->pick( $player => 'discard', [ $choice - 1 ] );
                 goto SKIP_TO_THE_END;
@@ -230,7 +230,7 @@ while ( !$game_over ) {
             {
                 @{ $players{$player}{hazards} } = grep { $_ ne 'Out of Gas' }
                     @{ $players{$player}{hazards} };
-                $players{$player}{can_move} = 1;
+                $players{$player}{can_move} = 0;
                 $message = "$player has refueled their car and can now move!";
                 $game->pick( $player => 'discard', [ $choice - 1 ] );
                 goto SKIP_TO_THE_END;
@@ -246,7 +246,7 @@ while ( !$game_over ) {
             {
                 @{ $players{$player}{hazards} } = grep { $_ ne 'Flat Tire' }
                     @{ $players{$player}{hazards} };
-                $players{$player}{can_move} = 1;
+                $players{$player}{can_move} = 0;
                 $message = "$player has changed their tire and can now move!";
                 $game->pick( $player => 'discard', [ $choice - 1 ] );
                 goto SKIP_TO_THE_END;
@@ -340,6 +340,9 @@ while ( !$game_over ) {
                 @{ $players{$player}{safety} } )
             {
                 push @{ $players{$player}{safety} }, 'Puncture-Proof';
+                # Remove Flat Tire hazard if present
+                @{ $players{$player}{hazards} } = grep { $_ ne 'Flat Tire' } @{ $players{$player}{hazards} };
+
                 $message = "$player is now protected against Flat Tires!";
                 $game->pick( $player => 'discard', [ $choice - 1 ] );
                 goto SKIP_TO_THE_END;
