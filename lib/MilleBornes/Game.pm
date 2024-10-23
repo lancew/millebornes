@@ -3,7 +3,6 @@ package MilleBornes::Game;
 use Moo;
 use Game::Deckar;
 
-
 has 'target_distance' => (
     is      => 'ro',
     default => 1000,
@@ -108,6 +107,44 @@ sub _build_deck {
     $deck->shuffle('pile');
 
     return $deck;
+}
+
+sub score {
+    my ($self) = @_;
+    my %scores;
+
+    for my $player ( keys %{ $self->players } ) {
+        my $player_data = $self->players->{$player};
+
+        # Base score: Total distance traveled
+        $scores{$player} = $player_data->{distance};
+
+        # Bonus for completing the trip
+        if ( $player_data->{distance} >= $self->target_distance ) {
+            $scores{$player} += 400;
+        }
+
+        # Bonus for each safety card played
+        $scores{$player} += 100 * scalar( @{ $player_data->{safety} } );
+
+        # Bonus for all 4 safety cards
+        if ( scalar( @{ $player_data->{safety} } ) == 4 ) {
+            $scores{$player} += 300;
+        }
+
+        # Bonus for Coup Fourré (if implemented)
+        # This would require additional tracking in the game logic
+        # $scores{$player} += 300 * $player_data->{coup_fourre_count};
+
+        # Bonus for shutout (if opponent's distance is 0)
+        my ($opponent) = grep { $_ ne $player } keys %{ $self->players };
+        if ( $self->players->{$opponent}->{distance} == 0 ) {
+            $scores{$player} += 500;
+        }
+    }
+
+    return %scores;
+
 }
 
 1;

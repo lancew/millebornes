@@ -148,8 +148,10 @@ while ( !$game_over ) {
                     if $played_card eq 'Stop';
                 $game->pick( $player => 'discard', [ $choice - 1 ] );
 
-                $message = "$opponent has been stopped." if $played_card eq 'Stop';
-                $message = "$opponent has been slowed by Speed Limit." if $played_card eq 'Speed Limit';
+                $message = "$opponent has been stopped."
+                    if $played_card eq 'Stop';
+                $message = "$opponent has been slowed by Speed Limit."
+                    if $played_card eq 'Speed Limit';
                 goto SKIP_TO_THE_END;
             }
             else {
@@ -276,7 +278,8 @@ while ( !$game_over ) {
 
         if ( $played_card eq 'Roll' ) {
             if ( @{ $players{$player}{hazards} } == 1
-                && $players{$player}{hazards}[0] eq 'Stop' || $players{$player}{hazards}[0] eq 'Speed Limit' )
+                && $players{$player}{hazards}[0] eq 'Stop'
+                || $players{$player}{hazards}[0] eq 'Speed Limit' )
             {
                 @{ $players{$player}{hazards} } = ();
                 $players{$player}{can_move} = 1;
@@ -342,7 +345,8 @@ while ( !$game_over ) {
             {
                 push @{ $players{$player}{safety} }, 'Puncture-Proof';
                 # Remove Flat Tire hazard if present
-                @{ $players{$player}{hazards} } = grep { $_ ne 'Flat Tire' } @{ $players{$player}{hazards} };
+                @{ $players{$player}{hazards} } = grep { $_ ne 'Flat Tire' }
+                    @{ $players{$player}{hazards} };
 
                 $message = "$player is now protected against Flat Tires!";
                 $game->pick( $player => 'discard', [ $choice - 1 ] );
@@ -403,11 +407,14 @@ while ( !$game_over ) {
     }
 }
 
-my $winner = (
-    sort { $players{$b}{distance} <=> $players{$a}{distance} }
-        keys %players
-)[0];
-print "$winner has won the game!\n";
+my %scores = $mb_game->score;
+
+print "Scores: \n";
+for my $player ( sort { $scores{$b} <=> $scores{$a} } keys %scores ) {
+    print "$player: $scores{$player}\n";
+}
+
+exit;
 
 sub _display_header {
     my ( $player, $players ) = @_;
