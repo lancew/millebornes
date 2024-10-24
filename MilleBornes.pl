@@ -396,7 +396,6 @@ while ( !$game_over ) {
             print "$player discarded $discarded_card\n";
 
             my $hand = $game->get($player);
-            warn Dumper $hand;
         }
 
     SKIP_TO_THE_END:
