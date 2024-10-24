@@ -147,4 +147,30 @@ sub score {
 
 }
 
+sub display_header {
+    my ( $self,$target_distance, $player, $players ) = @_;
+    system('clear');
+
+    print "Race to $target_distance km\n\n";
+    print "Player 1: $players->{'Player 1'}{distance} km\n";
+    print "Player 2: $players->{'Player 2'}{distance} km\n";
+
+    print "\nSafety cards:";
+    print join( ", ", @{ $players->{$player}{safety} } ) || "None";
+
+    print "\nRemedy cards:";
+    print join( ", ", @{ $players->{$player}{remedies} } ) || "None";
+
+    print "\nHazards:";
+    print join( ", ", @{ $players->{$player}{hazards} } ) || "None";
+
+    print "\n\n$player\'s turn:\n\n";
+    print "Distance: $players->{$player}{distance}\n";
+
+    print "Can move: "
+        . ( $players->{$player}{can_move} ? "Yes" : "No" ) . "\n";
+
+}
+
+
 1;

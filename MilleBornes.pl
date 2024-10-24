@@ -48,7 +48,7 @@ while ( !$game_over ) {
         }
 
     DISPLAY:
-        _display_header( $player, \%players );
+        $mb_game->display_header( $target_distance, $player, \%players );
 
         if ($message) {
             print "\n";
@@ -415,29 +415,6 @@ for my $player ( sort { $scores{$b} <=> $scores{$a} } keys %scores ) {
 
 exit;
 
-sub _display_header {
-    my ( $player, $players ) = @_;
-    system('clear');
 
-    print "Race to $target_distance km\n\n";
-    print "Player 1: $players->{'Player 1'}{distance} km\n";
-    print "Player 2: $players->{'Player 2'}{distance} km\n";
-
-    print "\nSafety cards:";
-    print join( ", ", @{ $players->{$player}{safety} } ) || "None";
-
-    print "\nRemedy cards:";
-    print join( ", ", @{ $players->{$player}{remedies} } ) || "None";
-
-    print "\nHazards:";
-    print join( ", ", @{ $players->{$player}{hazards} } ) || "None";
-
-    print "\n\n$player\'s turn:\n\n";
-    print "Distance: $players->{$player}{distance}\n";
-
-    print "Can move: "
-        . ( $players->{$player}{can_move} ? "Yes" : "No" ) . "\n";
-
-}
 
 1;
