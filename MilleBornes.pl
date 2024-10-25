@@ -409,9 +409,12 @@ while ( !$game_over ) {
 my %scores = $mb_game->score;
 
 print "Scores: \n";
+my $winner = ( sort { $scores{$b} <=> $scores{$a} } keys %scores )[0];
 for my $player ( sort { $scores{$b} <=> $scores{$a} } keys %scores ) {
     print "$player: $scores{$player}\n";
 }
+
+print "\n$winner wins! 🏆\n";
 
 exit;
 
