@@ -187,7 +187,7 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Flat Tire' ) {
-            unless ( grep { $_ eq 'Puncture-proof' }
+            unless ( grep { $_ eq 'Puncture-Proof' }
                 @{ $players{$opponent}{safety} } )
             {
                 push @{ $players{$opponent}{hazards} }, $played_card;
