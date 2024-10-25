@@ -50,6 +50,16 @@ while ( !$game_over ) {
     DISPLAY:
         $mb_game->display_header( $target_distance, $player, \%players );
 
+        display_progress_bar(
+            'Player 1',       $players{'Player 1'}{distance},
+            $target_distance, $players{'Player 1'}{can_move}
+        );
+        display_progress_bar(
+            'Player 2',       $players{'Player 2'}{distance},
+            $target_distance, $players{'Player 2'}{can_move}
+        );
+        print "\n";
+
         if ($message) {
             print "\n";
             print $message;
@@ -61,6 +71,13 @@ while ( !$game_over ) {
         push @hand, 'Discard';
         #print "$player\'s hand: " . join( ", ", @hand ) . "\n";
 
+        print "\n\n";
+        if ( $player eq 'Player 1' ) {
+            print "\e[7m $player 's turn \e[0m\n\n";
+        }
+        else {
+            print "$player 's turn \n\n";
+        }
         print "Choose a card to play (enter the number): \n";
         for my $i ( 0 .. $#hand ) {
             print $i + 1 . ". $hand[$i]\n";
@@ -398,6 +415,14 @@ for my $player ( sort { $scores{$b} <=> $scores{$a} } keys %scores ) {
 
 exit;
 
-
+sub display_progress_bar {
+    my ( $player, $distance, $target_distance, $can_move ) = @_;
+    my $bar_width = 50;
+    my $progress  = int( ( $distance / $target_distance ) * $bar_width );
+    my $bar = '[' . '#' x $progress . ' ' x ( $bar_width - $progress ) . ']';
+    my $move_indicator = $can_move ? '🚗' : '🚫';
+    printf "%-10s %s\n", "$player $move_indicator", $bar;
+}
 
 1;
+
