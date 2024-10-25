@@ -151,7 +151,7 @@ sub display_header {
     my ( $self,$target_distance, $player, $players ) = @_;
     system('clear');
 
-    print "Race to $target_distance km\n\n";
+    print "Race to Mille Bornes ($target_distance km)\n\n";
     print "Player 1: $players->{'Player 1'}{distance} km\n";
     print "Player 2: $players->{'Player 2'}{distance} km\n";
 
@@ -164,11 +164,12 @@ sub display_header {
     print "\nHazards:";
     print join( ", ", @{ $players->{$player}{hazards} } ) || "None";
 
-    print "\n\n$player\'s turn:\n\n";
-    print "Distance: $players->{$player}{distance}\n";
+    
+    print "\nDistance: $players->{$player}{distance}\n";
 
     print "Can move: "
         . ( $players->{$player}{can_move} ? "Yes" : "No" ) . "\n";
+    
 
 }
 
