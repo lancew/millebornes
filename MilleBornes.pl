@@ -132,6 +132,14 @@ while ( !$game_over ) {
         }
 
         if ( $played_card =~ /^(Stop|Out of Gas|Flat Tire|Accident)$/ ) {
+            # Check if opponent has no hazards or only a Stop hazard
+            if (!@{ $players{$opponent}{hazards} } || 
+                (@{ $players{$opponent}{hazards} } == 1 && $players{$opponent}{hazards}[0] eq 'Stop')) {
+                # Opponent has no hazards or only a Stop, so this hazard can be played
+            } else {
+                $message = "Your opponent already has a hazard that is not Stop. You cannot play another hazard.";
+                goto DISPLAY;
+            }
             unless ( $players{$opponent}{can_move} ) {
                 $message
                     = "You cannot play a Hazard card when your opponent is not moving (except for Speed Limit).";
