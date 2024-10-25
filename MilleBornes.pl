@@ -114,23 +114,6 @@ while ( !$game_over ) {
             goto SKIP_TO_THE_END;
         }
 
-        if ( $played_card =~ / KM$/ ) {
-
-            my ($distance) = $played_card =~ /(\d+)/;
-
-            if ( $players{$player}{distance} + $distance > $target_distance )
-            {
-                $message
-                    = "\Cannot play this distance card. It would exceed the target distance.";
-                goto DISPLAY;
-            }
-
-            $players{$player}{distance} += $distance;
-
-            $game->pick( $player => 'discard', [ $choice - 1 ] );
-            goto SKIP_TO_THE_END;
-        }
-
         if ( $played_card =~ /^(Stop|Out of Gas|Flat Tire|Accident)$/ ) {
             unless ( $players{$opponent}{can_move} ) {
                 $message
