@@ -416,7 +416,7 @@ while ( !$game_over ) {
 
 my %scores = $mb_game->score;
 
-print "Scores: \n";
+print "\n\nScores: \n";
 my $winner = ( sort { $scores{$b} <=> $scores{$a} } keys %scores )[0];
 for my $player ( sort { $scores{$b} <=> $scores{$a} } keys %scores ) {
     print "$player: $scores{$player}\n";
@@ -431,7 +431,10 @@ sub display_progress_bar {
     my $bar_width = 50;
     my $progress  = int( ( $distance / $target_distance ) * $bar_width );
     my $bar = '[' . '#' x $progress . ' ' x ( $bar_width - $progress ) . ']';
-    my $move_indicator = $can_move ? '🚗' : '🚫';
+    my $move_indicator = $can_move ? '🚗' : '🛑';
+    if (grep { $_ eq 'Speed Limit' } @{ $players{$player}{hazards} }) {
+        $move_indicator .= '㉌';
+    }
     printf "%-10s %s\n", "$player $move_indicator", $bar;
 }
 
