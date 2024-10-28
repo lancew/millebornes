@@ -434,6 +434,13 @@ sub display_progress_bar {
     my $move_indicator = $can_move ? '🚗' : '🛑';
     if (grep { $_ eq 'Speed Limit' } @{ $players{$player}{hazards} }) {
         $move_indicator .= '㉌';
+    } else {
+        $move_indicator .= ' ';
+    }
+    if (grep { $_ ne 'Speed Limit' } @{ $players{$player}{hazards} }) {
+        $move_indicator .= '⚠️';
+    } else {
+        $move_indicator .= ' ';
     }
     printf "%-10s %s\n", "$player $move_indicator", $bar;
 }
