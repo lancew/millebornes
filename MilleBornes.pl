@@ -249,17 +249,13 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'End of Limit' ) {
-            if ( grep { $_ eq 'Speed Limit' }
-                @{ $players{$player}{hazards} } )
-            {
-                @{ $players{$player}{hazards} } = grep { $_ ne 'Speed Limit' }
-                    @{ $players{$player}{hazards} };
-                $message = "$player is no longer under a Speed Limit!";
-                $game->pick( $player => 'discard', [ $choice - 1 ] );
+            my $result = play_end_of_limit($player, $choice);
+            if ( $result->{success} ) {
+                $message = $result->{message};
                 goto SKIP_TO_THE_END;
             }
             else {
-                $message = "You're not under a Speed Limit.";
+                $message = $result->{message};
                 goto DISPLAY;
             }
         }
@@ -559,6 +555,26 @@ sub play_roll {
         return {
             success => 0,
             message => "You don't need to play Roll right now."
+        };
+    }
+}
+
+sub play_end_of_limit {
+    my ($player, $choice) = @_;
+
+    if ( grep { $_ eq 'Speed Limit' } @{ $players{$player}{hazards} } ) {
+        @{ $players{$player}{hazards} } = grep { $_ ne 'Speed Limit' }
+            @{ $players{$player}{hazards} };
+        $game->pick( $player => 'discard', [ $choice - 1 ] );
+        return {
+            success => 1,
+            message => "$player is no longer under a Speed Limit!"
+        };
+    }
+    else {
+        return {
+            success => 0,
+            message => "You're not under a Speed Limit."
         };
     }
 }
