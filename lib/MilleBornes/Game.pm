@@ -155,6 +155,8 @@ sub display_header {
     print "Player 1: $players->{'Player 1'}{distance} km\n";
     print "Player 2: $players->{'Player 2'}{distance} km\n";
 
+    print "\n\nCards remaining in deck: " . scalar(@{$self->deck->get('pile')});
+
     print "\nSafety cards:";
     print join( ", ", @{ $players->{$player}{safety} } ) || "None";
 
