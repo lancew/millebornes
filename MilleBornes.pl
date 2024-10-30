@@ -324,20 +324,12 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Puncture-Proof' ) {
-            if ( !grep { $_ eq 'Puncture-Proof' }
-                @{ $players{$player}{safety} } )
-            {
-                push @{ $players{$player}{safety} }, 'Puncture-Proof';
-                # Remove Flat Tire hazard if present
-                @{ $players{$player}{hazards} } = grep { $_ ne 'Flat Tire' }
-                    @{ $players{$player}{hazards} };
-
-                $message = "$player is now protected against Flat Tires!";
-                $game->pick( $player => 'discard', [ $choice - 1 ] );
+            my $result = play_puncture_proof($player, $choice);
+            if ($result->{success}) {
+                $message = $result->{message};
                 goto SKIP_TO_THE_END;
-            }
-            else {
-                $message = "You already have the Puncture-Proof safety card.";
+            } else {
+                $message = $result->{message};
                 goto DISPLAY;
             }
         }
@@ -468,6 +460,28 @@ sub play_right_of_way {
         return {
             success => 0,
             message => "You already have the Right of Way safety card."
+        };
+    }
+}
+
+sub play_puncture_proof {
+    my ($player, $choice) = @_;
+    
+    if (!grep { $_ eq 'Puncture-Proof' } @{ $players{$player}{safety} }) {
+        push @{ $players{$player}{safety} }, 'Puncture-Proof';
+        # Remove Flat Tire hazard if present
+        @{ $players{$player}{hazards} } = grep { $_ ne 'Flat Tire' }
+            @{ $players{$player}{hazards} };
+        
+        $game->pick($player => 'discard', [$choice - 1]);
+        return {
+            success => 1,
+            message => "$player is now protected against Flat Tires!"
+        };
+    } else {
+        return {
+            success => 0,
+            message => "You already have the Puncture-Proof safety card."
         };
     }
 }
