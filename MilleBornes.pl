@@ -167,18 +167,13 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Flat Tire' ) {
-            unless ( grep { $_ eq 'Puncture-Proof' }
-                @{ $players{$opponent}{safety} } )
-            {
-                push @{ $players{$opponent}{hazards} }, $played_card;
-                $players{$opponent}{can_move} = 0;
-                $message = "$opponent has a flat tire and cannot move!";
-                $game->pick( $player => 'discard', [ $choice - 1 ] );
+            my $result = play_flat_tire($player, $choice);
+            if ( $result->{success} ) {
+                $message = $result->{message};
                 goto SKIP_TO_THE_END;
             }
             else {
-                $message
-                    = "$opponent is protected by Puncture-proof. Hazard not applied.\n";
+                $message = $result->{message};
                 goto DISPLAY;
             }
         }
@@ -640,6 +635,27 @@ sub play_accident {
         return {
             success => 0,
             message => "$opponent is protected by Driving Ace. Hazard not applied."
+        };
+    }
+}
+
+sub play_flat_tire {
+    my ($player, $choice) = @_;
+    my $opponent = ($player eq 'Player 1') ? 'Player 2' : 'Player 1';
+
+    unless ( grep { $_ eq 'Puncture-Proof' } @{ $players{$opponent}{safety} } ) {
+        push @{ $players{$opponent}{hazards} }, 'Flat Tire';
+        $players{$opponent}{can_move} = 0;
+        $game->pick( $player => 'discard', [ $choice - 1 ] );
+        return {
+            success => 1,
+            message => "$opponent has a flat tire and cannot move!"
+        };
+    }
+    else {
+        return {
+            success => 0,
+            message => "$opponent is protected by Puncture-proof. Hazard not applied."
         };
     }
 }
