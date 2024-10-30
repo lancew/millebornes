@@ -184,19 +184,13 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Accident' ) {
-            unless ( grep { $_ eq 'Driving Ace' }
-                @{ $players{$opponent}{safety} } )
-            {
-                push @{ $players{$opponent}{hazards} }, $played_card;
-                $players{$opponent}{can_move} = 0;
-                $message
-                    = "$opponent has been in an Accident and cannot move!";
-                $game->pick( $player => 'discard', [ $choice - 1 ] );
+            my $result = play_accident($player, $choice);
+            if ( $result->{success} ) {
+                $message = $result->{message};
                 goto SKIP_TO_THE_END;
             }
             else {
-                $message
-                    = "$opponent is protected by Driving Ace. Hazard not applied.\n";
+                $message = $result->{message};
                 goto DISPLAY;
             }
         }
@@ -625,6 +619,27 @@ sub play_repairs {
         return {
             success => 0,
             message => "You don't have an Accident to repair."
+        };
+    }
+}
+
+sub play_accident {
+    my ($player, $choice) = @_;
+    my $opponent = ($player eq 'Player 1') ? 'Player 2' : 'Player 1';
+
+    unless ( grep { $_ eq 'Driving Ace' } @{ $players{$opponent}{safety} } ) {
+        push @{ $players{$opponent}{hazards} }, 'Accident';
+        $players{$opponent}{can_move} = 0;
+        $game->pick( $player => 'discard', [ $choice - 1 ] );
+        return {
+            success => 1,
+            message => "$opponent has been in an Accident and cannot move!"
+        };
+    }
+    else {
+        return {
+            success => 0,
+            message => "$opponent is protected by Driving Ace. Hazard not applied."
         };
     }
 }
