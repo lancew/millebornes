@@ -202,16 +202,13 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Repairs' ) {
-            if ( grep { $_ eq 'Accident' } @{ $players{$player}{hazards} } ) {
-                @{ $players{$player}{hazards} } = grep { $_ ne 'Accident' }
-                    @{ $players{$player}{hazards} };
-                $players{$player}{can_move} = 0;
-                $message = "$player has repaired their car and can now move!";
-                $game->pick( $player => 'discard', [ $choice - 1 ] );
+            my $result = play_repairs($player, $choice);
+            if ( $result->{success} ) {
+                $message = $result->{message};
                 goto SKIP_TO_THE_END;
             }
             else {
-                $message = "You don't have an Accident to repair.";
+                $message = $result->{message};
                 goto DISPLAY;
             }
         }
@@ -607,6 +604,27 @@ sub play_gasoline {
         return {
             success => 0,
             message => "You don't need Gasoline right now."
+        };
+    }
+}
+
+sub play_repairs {
+    my ($player, $choice) = @_;
+
+    if ( grep { $_ eq 'Accident' } @{ $players{$player}{hazards} } ) {
+        @{ $players{$player}{hazards} } = grep { $_ ne 'Accident' }
+            @{ $players{$player}{hazards} };
+        $players{$player}{can_move} = 1;
+        $game->pick( $player => 'discard', [ $choice - 1 ] );
+        return {
+            success => 1,
+            message => "$player has repaired their car and can now move!"
+        };
+    }
+    else {
+        return {
+            success => 0,
+            message => "You don't have an Accident to repair."
         };
     }
 }
