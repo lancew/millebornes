@@ -298,16 +298,13 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Driving Ace' ) {
-            if ( !grep { $_ eq 'Driving Ace' }
-                @{ $players{$player}{safety} } )
-            {
-                push @{ $players{$player}{safety} }, 'Driving Ace';
-                $message = "$player is now protected against Accidents!";
-                $game->pick( $player => 'discard', [ $choice - 1 ] );
+            my $result = play_driving_ace($player, $choice);
+            if ( $result->{success} ) {
+                $message = $result->{message};
                 goto SKIP_TO_THE_END;
             }
             else {
-                $message = "You already have the Driving Ace safety card.";
+                $message = $result->{message};
                 goto DISPLAY;
             }
         }
@@ -410,6 +407,7 @@ sub display_progress_bar {
     else {
         $move_indicator .= ' ';
     }
+    
     printf "%-10s %s\n", "$player $move_indicator", $bar;
 }
 
@@ -517,6 +515,29 @@ sub play_extra_tank {
         return {
             success => 0,
             message => "You already have the Extra Tank safety card."
+        };
+    }
+}
+
+sub play_driving_ace {
+    my ( $player, $choice ) = @_;
+
+    if ( !grep { $_ eq 'Driving Ace' } @{ $players{$player}{safety} } ) {
+        push @{ $players{$player}{safety} }, 'Driving Ace';
+        # Remove Accident hazard if present
+        @{ $players{$player}{hazards} }
+            = grep { $_ ne 'Accident' } @{ $players{$player}{hazards} };
+            
+        $game->pick( $player => 'discard', [ $choice - 1 ] );
+        return {
+            success => 1,
+            message => "$player is now protected against Accidents!"
+        };
+    }
+    else {
+        return {
+            success => 0,
+            message => "You already have the Driving Ace safety card."
         };
     }
 }
