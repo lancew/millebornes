@@ -265,34 +265,13 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Roll' ) {
-            if ( @{ $players{$player}{hazards} } == 1
-                && $players{$player}{hazards}[0] eq 'Stop'
-                || $players{$player}{hazards}[0] eq 'Speed Limit' )
-            {
-                @{ $players{$player}{hazards} } = ();
-                $players{$player}{can_move} = 1;
-                $message = "$player can now move!";
-                $game->pick( $player => 'discard', [ $choice - 1 ] );
-                goto SKIP_TO_THE_END;
-            }
-            elsif (
-                @{ $players{$player}{hazards} } > 1
-                || ( @{ $players{$player}{hazards} } == 1
-                    && $players{$player}{hazards}[0] ne 'Stop' )
-                )
-            {
-                $message
-                    = "You can't play Roll when you have other hazards besides Stop.";
-                goto DISPLAY;
-            }
-            elsif ( !$players{$player}{can_move} ) {
-                $players{$player}{can_move} = 1;
-                $message = "$player can now move!";
-                $game->pick( $player => 'discard', [ $choice - 1 ] );
+            my $result = play_roll($player, $choice);
+            if ( $result->{success} ) {
+                $message = $result->{message};
                 goto SKIP_TO_THE_END;
             }
             else {
-                $message = "You don't need to play Roll right now.";
+                $message = $result->{message};
                 goto DISPLAY;
             }
         }
@@ -538,6 +517,48 @@ sub play_driving_ace {
         return {
             success => 0,
             message => "You already have the Driving Ace safety card."
+        };
+    }
+}
+
+sub play_roll {
+    my ($player, $choice) = @_;
+
+    if ( @{ $players{$player}{hazards} } == 1
+        && $players{$player}{hazards}[0] eq 'Stop'
+        || $players{$player}{hazards}[0] eq 'Speed Limit' )
+    {
+        @{ $players{$player}{hazards} } = ();
+        $players{$player}{can_move} = 1;
+        $game->pick( $player => 'discard', [ $choice - 1 ] );
+        return {
+            success => 1,
+            message => "$player can now move!"
+        };
+    }
+    elsif (
+        @{ $players{$player}{hazards} } > 1
+        || ( @{ $players{$player}{hazards} } == 1
+            && $players{$player}{hazards}[0] ne 'Stop' )
+        )
+    {
+        return {
+            success => 0,
+            message => "You can't play Roll when you have other hazards besides Stop."
+        };
+    }
+    elsif ( !$players{$player}{can_move} ) {
+        $players{$player}{can_move} = 1;
+        $game->pick( $player => 'discard', [ $choice - 1 ] );
+        return {
+            success => 1,
+            message => "$player can now move!"
+        };
+    }
+    else {
+        return {
+            success => 0,
+            message => "You don't need to play Roll right now."
         };
     }
 }
