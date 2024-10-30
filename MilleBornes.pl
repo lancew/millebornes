@@ -95,41 +95,17 @@ while ( !$game_over ) {
         my $played_card = $hand[ $choice - 1 ];
 
         if ( $played_card =~ /^(\d+) KM$/ ) {
-            my $distance = $1;
-
-            # Check if player can move
-            unless ( $players{$player}{can_move} ) {
-                $message
-                    = "You cannot play a distance card when you're not allowed to move.";
+            my $result = play_distance_card($player, $1, $choice);
+            if ($result->{success}) {
+                $message = $result->{message};
+                goto SKIP_TO_THE_END;
+            } else {
+                $message = $result->{message};
                 goto DISPLAY;
             }
-
-            # Check for Speed Limit
-            if ( grep { $_ eq 'Speed Limit' }
-                @{ $players{$player}{hazards} } )
-            {
-                if ( $distance > 50 ) {
-                    $message
-                        = "You can't play a distance card greater than 50 KM due to Speed Limit.";
-                    goto DISPLAY;
-                }
-            }
-
-            # Check if it would exceed target distance
-            if ( $players{$player}{distance} + $distance > $target_distance )
-            {
-                $message
-                    = "Cannot play this distance card. It would exceed the target distance.";
-                goto DISPLAY;
-            }
-
-            # Play the distance card
-            $players{$player}{distance} += $distance;
-            $game->pick( $player => 'discard', [ $choice - 1 ] );
-            $message
-                = "$player moved $distance KM. Total distance: $players{$player}{distance} KM.";
-            goto SKIP_TO_THE_END;
         }
+
+
 
         if ( $played_card =~ /^(Stop|Out of Gas|Flat Tire|Accident)$/ ) {
             # Check if opponent has no hazards or only a Stop hazard
@@ -443,6 +419,44 @@ sub display_progress_bar {
         $move_indicator .= ' ';
     }
     printf "%-10s %s\n", "$player $move_indicator", $bar;
+}
+
+sub play_distance_card {
+    my ($player, $distance, $choice) = @_;
+    
+    # Check if player can move
+    unless ( $players{$player}{can_move} ) {
+        return {
+            success => 0,
+            message => "You cannot play a distance card when you're not allowed to move."
+        };
+    }
+
+    # Check for Speed Limit
+    if ( grep { $_ eq 'Speed Limit' } @{ $players{$player}{hazards} } ) {
+        if ( $distance > 50 ) {
+            return {
+                success => 0,
+                message => "You can't play a distance card greater than 50 KM due to Speed Limit."
+            };
+        }
+    }
+
+    # Check if it would exceed target distance
+    if ( $players{$player}{distance} + $distance > $target_distance ) {
+        return {
+            success => 0,
+            message => "Cannot play this distance card. It would exceed the target distance."
+        };
+    }
+
+    # Play the distance card
+    $players{$player}{distance} += $distance;
+    $game->pick( $player => 'discard', [ $choice - 1 ] );
+    return {
+        success => 1,
+        message => "$player moved $distance KM. Total distance: $players{$player}{distance} KM."
+    };
 }
 
 1;
