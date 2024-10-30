@@ -343,17 +343,12 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Right of Way' ) {
-            if ( !grep { $_ eq 'Right of Way' }
-                @{ $players{$player}{safety} } )
-            {
-                push @{ $players{$player}{safety} }, 'Right of Way';
-                $message
-                    = "$player is now protected against Speed Limits and Stops!";
-                $game->pick( $player => 'discard', [ $choice - 1 ] );
+            my $result = play_right_of_way($player, $choice);
+            if ($result->{success}) {
+                $message = $result->{message};
                 goto SKIP_TO_THE_END;
-            }
-            else {
-                $message = "You already have the Right of Way safety card.";
+            } else {
+                $message = $result->{message};
                 goto DISPLAY;
             }
         }
@@ -457,6 +452,24 @@ sub play_distance_card {
         success => 1,
         message => "$player moved $distance KM. Total distance: $players{$player}{distance} KM."
     };
+}
+
+sub play_right_of_way {
+    my ($player, $choice) = @_;
+    
+    if (!grep { $_ eq 'Right of Way' } @{ $players{$player}{safety} }) {
+        push @{ $players{$player}{safety} }, 'Right of Way';
+        $game->pick($player => 'discard', [$choice - 1]);
+        return {
+            success => 1,
+            message => "$player is now protected against Speed Limits and Stops!"
+        };
+    } else {
+        return {
+            success => 0,
+            message => "You already have the Right of Way safety card."
+        };
+    }
 }
 
 1;
