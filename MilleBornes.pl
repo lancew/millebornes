@@ -150,18 +150,13 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Out of Gas' ) {
-            unless ( grep { $_ eq 'Extra Tank' }
-                @{ $players{$opponent}{safety} } )
-            {
-                push @{ $players{$opponent}{hazards} }, $played_card;
-                $players{$opponent}{can_move} = 0;
-                $message = "$opponent is out of gas and cannot move!";
-                $game->pick( $player => 'discard', [ $choice - 1 ] );
+            my $result = play_out_of_gas($player, $choice);
+            if ( $result->{success} ) {
+                $message = $result->{message};
                 goto SKIP_TO_THE_END;
             }
             else {
-                $message
-                    = "$opponent is protected by Extra Tank. Hazard not applied.\n";
+                $message = $result->{message};
                 goto DISPLAY;
             }
         }
@@ -656,6 +651,27 @@ sub play_flat_tire {
         return {
             success => 0,
             message => "$opponent is protected by Puncture-proof. Hazard not applied."
+        };
+    }
+}
+
+sub play_out_of_gas {
+    my ($player, $choice) = @_;
+    my $opponent = ($player eq 'Player 1') ? 'Player 2' : 'Player 1';
+
+    unless ( grep { $_ eq 'Extra Tank' } @{ $players{$opponent}{safety} } ) {
+        push @{ $players{$opponent}{hazards} }, 'Out of Gas';
+        $players{$opponent}{can_move} = 0;
+        $game->pick( $player => 'discard', [ $choice - 1 ] );
+        return {
+            success => 1,
+            message => "$opponent is out of gas and cannot move!"
+        };
+    }
+    else {
+        return {
+            success => 0,
+            message => "$opponent is protected by Extra Tank. Hazard not applied."
         };
     }
 }
