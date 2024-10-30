@@ -95,25 +95,29 @@ while ( !$game_over ) {
         my $played_card = $hand[ $choice - 1 ];
 
         if ( $played_card =~ /^(\d+) KM$/ ) {
-            my $result = play_distance_card($player, $1, $choice);
-            if ($result->{success}) {
+            my $result = play_distance_card( $player, $1, $choice );
+            if ( $result->{success} ) {
                 $message = $result->{message};
                 goto SKIP_TO_THE_END;
-            } else {
+            }
+            else {
                 $message = $result->{message};
                 goto DISPLAY;
             }
         }
 
-
-
         if ( $played_card =~ /^(Stop|Out of Gas|Flat Tire|Accident)$/ ) {
             # Check if opponent has no hazards or only a Stop hazard
-            if (!@{ $players{$opponent}{hazards} } || 
-                (@{ $players{$opponent}{hazards} } == 1 && $players{$opponent}{hazards}[0] eq 'Stop')) {
-                # Opponent has no hazards or only a Stop, so this hazard can be played
-            } else {
-                $message = "Your opponent already has a hazard that is not Stop. You cannot play another hazard.";
+            if (!@{ $players{$opponent}{hazards} }
+                || ( @{ $players{$opponent}{hazards} } == 1
+                    && $players{$opponent}{hazards}[0] eq 'Stop' )
+                )
+            {
+        # Opponent has no hazards or only a Stop, so this hazard can be played
+            }
+            else {
+                $message
+                    = "Your opponent already has a hazard that is not Stop. You cannot play another hazard.";
                 goto DISPLAY;
             }
             unless ( $players{$opponent}{can_move} ) {
@@ -324,22 +328,24 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Puncture-Proof' ) {
-            my $result = play_puncture_proof($player, $choice);
-            if ($result->{success}) {
+            my $result = play_puncture_proof( $player, $choice );
+            if ( $result->{success} ) {
                 $message = $result->{message};
                 goto SKIP_TO_THE_END;
-            } else {
+            }
+            else {
                 $message = $result->{message};
                 goto DISPLAY;
             }
         }
 
         if ( $played_card eq 'Right of Way' ) {
-            my $result = play_right_of_way($player, $choice);
-            if ($result->{success}) {
+            my $result = play_right_of_way( $player, $choice );
+            if ( $result->{success} ) {
                 $message = $result->{message};
                 goto SKIP_TO_THE_END;
-            } else {
+            }
+            else {
                 $message = $result->{message};
                 goto DISPLAY;
             }
@@ -395,27 +401,30 @@ sub display_progress_bar {
     my $progress  = int( ( $distance / $target_distance ) * $bar_width );
     my $bar = '[' . '#' x $progress . ' ' x ( $bar_width - $progress ) . ']';
     my $move_indicator = $can_move ? '🚗' : '🛑';
-    if (grep { $_ eq 'Speed Limit' } @{ $players{$player}{hazards} }) {
+    if ( grep { $_ eq 'Speed Limit' } @{ $players{$player}{hazards} } ) {
         $move_indicator .= '㉌';
-    } else {
+    }
+    else {
         $move_indicator .= ' ';
     }
-    if (grep { $_ ne 'Speed Limit' } @{ $players{$player}{hazards} }) {
+    if ( grep { $_ ne 'Speed Limit' } @{ $players{$player}{hazards} } ) {
         $move_indicator .= '⚠️';
-    } else {
+    }
+    else {
         $move_indicator .= ' ';
     }
     printf "%-10s %s\n", "$player $move_indicator", $bar;
 }
 
 sub play_distance_card {
-    my ($player, $distance, $choice) = @_;
-    
+    my ( $player, $distance, $choice ) = @_;
+
     # Check if player can move
     unless ( $players{$player}{can_move} ) {
         return {
             success => 0,
-            message => "You cannot play a distance card when you're not allowed to move."
+            message =>
+                "You cannot play a distance card when you're not allowed to move."
         };
     }
 
@@ -424,7 +433,8 @@ sub play_distance_card {
         if ( $distance > 50 ) {
             return {
                 success => 0,
-                message => "You can't play a distance card greater than 50 KM due to Speed Limit."
+                message =>
+                    "You can't play a distance card greater than 50 KM due to Speed Limit."
             };
         }
     }
@@ -433,7 +443,8 @@ sub play_distance_card {
     if ( $players{$player}{distance} + $distance > $target_distance ) {
         return {
             success => 0,
-            message => "Cannot play this distance card. It would exceed the target distance."
+            message =>
+                "Cannot play this distance card. It would exceed the target distance."
         };
     }
 
@@ -442,21 +453,24 @@ sub play_distance_card {
     $game->pick( $player => 'discard', [ $choice - 1 ] );
     return {
         success => 1,
-        message => "$player moved $distance KM. Total distance: $players{$player}{distance} KM."
+        message =>
+            "$player moved $distance KM. Total distance: $players{$player}{distance} KM."
     };
 }
 
 sub play_right_of_way {
-    my ($player, $choice) = @_;
-    
-    if (!grep { $_ eq 'Right of Way' } @{ $players{$player}{safety} }) {
+    my ( $player, $choice ) = @_;
+
+    if ( !grep { $_ eq 'Right of Way' } @{ $players{$player}{safety} } ) {
         push @{ $players{$player}{safety} }, 'Right of Way';
-        $game->pick($player => 'discard', [$choice - 1]);
+        $game->pick( $player => 'discard', [ $choice - 1 ] );
         return {
             success => 1,
-            message => "$player is now protected against Speed Limits and Stops!"
+            message =>
+                "$player is now protected against Speed Limits and Stops!"
         };
-    } else {
+    }
+    else {
         return {
             success => 0,
             message => "You already have the Right of Way safety card."
@@ -465,20 +479,21 @@ sub play_right_of_way {
 }
 
 sub play_puncture_proof {
-    my ($player, $choice) = @_;
-    
-    if (!grep { $_ eq 'Puncture-Proof' } @{ $players{$player}{safety} }) {
+    my ( $player, $choice ) = @_;
+
+    if ( !grep { $_ eq 'Puncture-Proof' } @{ $players{$player}{safety} } ) {
         push @{ $players{$player}{safety} }, 'Puncture-Proof';
         # Remove Flat Tire hazard if present
-        @{ $players{$player}{hazards} } = grep { $_ ne 'Flat Tire' }
-            @{ $players{$player}{hazards} };
-        
-        $game->pick($player => 'discard', [$choice - 1]);
+        @{ $players{$player}{hazards} }
+            = grep { $_ ne 'Flat Tire' } @{ $players{$player}{hazards} };
+
+        $game->pick( $player => 'discard', [ $choice - 1 ] );
         return {
             success => 1,
             message => "$player is now protected against Flat Tires!"
         };
-    } else {
+    }
+    else {
         return {
             success => 0,
             message => "You already have the Puncture-Proof safety card."
