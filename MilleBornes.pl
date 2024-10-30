@@ -128,7 +128,7 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Stop' ) {
-            my $result = play_stop($player, $choice);
+            my $result = play_stop( $player, $choice );
             if ( $result->{success} ) {
                 $message = $result->{message};
                 goto SKIP_TO_THE_END;
@@ -140,7 +140,7 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Speed Limit' ) {
-            my $result = play_speed_limit($player, $choice);
+            my $result = play_speed_limit( $player, $choice );
             if ( $result->{success} ) {
                 $message = $result->{message};
                 goto SKIP_TO_THE_END;
@@ -152,7 +152,7 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Out of Gas' ) {
-            my $result = play_out_of_gas($player, $choice);
+            my $result = play_out_of_gas( $player, $choice );
             if ( $result->{success} ) {
                 $message = $result->{message};
                 goto SKIP_TO_THE_END;
@@ -164,7 +164,7 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Flat Tire' ) {
-            my $result = play_flat_tire($player, $choice);
+            my $result = play_flat_tire( $player, $choice );
             if ( $result->{success} ) {
                 $message = $result->{message};
                 goto SKIP_TO_THE_END;
@@ -176,7 +176,7 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Accident' ) {
-            my $result = play_accident($player, $choice);
+            my $result = play_accident( $player, $choice );
             if ( $result->{success} ) {
                 $message = $result->{message};
                 goto SKIP_TO_THE_END;
@@ -188,7 +188,7 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Repairs' ) {
-            my $result = play_repairs($player, $choice);
+            my $result = play_repairs( $player, $choice );
             if ( $result->{success} ) {
                 $message = $result->{message};
                 goto SKIP_TO_THE_END;
@@ -200,7 +200,7 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Gasoline' ) {
-            my $result = play_gasoline($player, $choice);
+            my $result = play_gasoline( $player, $choice );
             if ( $result->{success} ) {
                 $message = $result->{message};
                 goto SKIP_TO_THE_END;
@@ -212,7 +212,7 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Spare Tire' ) {
-            my $result = play_spare_tire($player, $choice);
+            my $result = play_spare_tire( $player, $choice );
             if ( $result->{success} ) {
                 $message = $result->{message};
                 goto SKIP_TO_THE_END;
@@ -224,7 +224,7 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'End of Limit' ) {
-            my $result = play_end_of_limit($player, $choice);
+            my $result = play_end_of_limit( $player, $choice );
             if ( $result->{success} ) {
                 $message = $result->{message};
                 goto SKIP_TO_THE_END;
@@ -236,7 +236,7 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Roll' ) {
-            my $result = play_roll($player, $choice);
+            my $result = play_roll( $player, $choice );
             if ( $result->{success} ) {
                 $message = $result->{message};
                 goto SKIP_TO_THE_END;
@@ -248,7 +248,7 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Driving Ace' ) {
-            my $result = play_driving_ace($player, $choice);
+            my $result = play_driving_ace( $player, $choice );
             if ( $result->{success} ) {
                 $message = $result->{message};
                 goto SKIP_TO_THE_END;
@@ -260,7 +260,7 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Extra Tank' ) {
-            my $result = play_extra_tank($player, $choice);
+            my $result = play_extra_tank( $player, $choice );
             if ( $result->{success} ) {
                 $message = $result->{message};
                 goto SKIP_TO_THE_END;
@@ -360,7 +360,7 @@ sub display_progress_bar {
     else {
         $move_indicator .= ' ';
     }
-    
+
     printf "%-10s %s\n", "$player $move_indicator", $bar;
 }
 
@@ -457,7 +457,7 @@ sub play_extra_tank {
         # Remove Out of Gas hazard if present
         @{ $players{$player}{hazards} }
             = grep { $_ ne 'Out of Gas' } @{ $players{$player}{hazards} };
-            
+
         $game->pick( $player => 'discard', [ $choice - 1 ] );
         return {
             success => 1,
@@ -480,7 +480,7 @@ sub play_driving_ace {
         # Remove Accident hazard if present
         @{ $players{$player}{hazards} }
             = grep { $_ ne 'Accident' } @{ $players{$player}{hazards} };
-            
+
         $game->pick( $player => 'discard', [ $choice - 1 ] );
         return {
             success => 1,
@@ -496,7 +496,7 @@ sub play_driving_ace {
 }
 
 sub play_roll {
-    my ($player, $choice) = @_;
+    my ( $player, $choice ) = @_;
 
     if ( @{ $players{$player}{hazards} } == 1
         && $players{$player}{hazards}[0] eq 'Stop'
@@ -518,7 +518,8 @@ sub play_roll {
     {
         return {
             success => 0,
-            message => "You can't play Roll when you have other hazards besides Stop."
+            message =>
+                "You can't play Roll when you have other hazards besides Stop."
         };
     }
     elsif ( !$players{$player}{can_move} ) {
@@ -538,11 +539,11 @@ sub play_roll {
 }
 
 sub play_end_of_limit {
-    my ($player, $choice) = @_;
+    my ( $player, $choice ) = @_;
 
     if ( grep { $_ eq 'Speed Limit' } @{ $players{$player}{hazards} } ) {
-        @{ $players{$player}{hazards} } = grep { $_ ne 'Speed Limit' }
-            @{ $players{$player}{hazards} };
+        @{ $players{$player}{hazards} }
+            = grep { $_ ne 'Speed Limit' } @{ $players{$player}{hazards} };
         $game->pick( $player => 'discard', [ $choice - 1 ] );
         return {
             success => 1,
@@ -558,11 +559,11 @@ sub play_end_of_limit {
 }
 
 sub play_spare_tire {
-    my ($player, $choice) = @_;
+    my ( $player, $choice ) = @_;
 
     if ( grep { $_ eq 'Flat Tire' } @{ $players{$player}{hazards} } ) {
-        @{ $players{$player}{hazards} } = grep { $_ ne 'Flat Tire' }
-            @{ $players{$player}{hazards} };
+        @{ $players{$player}{hazards} }
+            = grep { $_ ne 'Flat Tire' } @{ $players{$player}{hazards} };
         $game->pick( $player => 'discard', [ $choice - 1 ] );
         return {
             success => 1,
@@ -578,11 +579,11 @@ sub play_spare_tire {
 }
 
 sub play_gasoline {
-    my ($player, $choice) = @_;
+    my ( $player, $choice ) = @_;
 
     if ( grep { $_ eq 'Out of Gas' } @{ $players{$player}{hazards} } ) {
-        @{ $players{$player}{hazards} } = grep { $_ ne 'Out of Gas' }
-            @{ $players{$player}{hazards} };
+        @{ $players{$player}{hazards} }
+            = grep { $_ ne 'Out of Gas' } @{ $players{$player}{hazards} };
         $game->pick( $player => 'discard', [ $choice - 1 ] );
         return {
             success => 1,
@@ -598,11 +599,11 @@ sub play_gasoline {
 }
 
 sub play_repairs {
-    my ($player, $choice) = @_;
+    my ( $player, $choice ) = @_;
 
     if ( grep { $_ eq 'Accident' } @{ $players{$player}{hazards} } ) {
-        @{ $players{$player}{hazards} } = grep { $_ ne 'Accident' }
-            @{ $players{$player}{hazards} };
+        @{ $players{$player}{hazards} }
+            = grep { $_ ne 'Accident' } @{ $players{$player}{hazards} };
         $players{$player}{can_move} = 1;
         $game->pick( $player => 'discard', [ $choice - 1 ] );
         return {
@@ -619,8 +620,8 @@ sub play_repairs {
 }
 
 sub play_accident {
-    my ($player, $choice) = @_;
-    my $opponent = ($player eq 'Player 1') ? 'Player 2' : 'Player 1';
+    my ( $player, $choice ) = @_;
+    my $opponent = ( $player eq 'Player 1' ) ? 'Player 2' : 'Player 1';
 
     unless ( grep { $_ eq 'Driving Ace' } @{ $players{$opponent}{safety} } ) {
         push @{ $players{$opponent}{hazards} }, 'Accident';
@@ -634,16 +635,19 @@ sub play_accident {
     else {
         return {
             success => 0,
-            message => "$opponent is protected by Driving Ace. Hazard not applied."
+            message =>
+                "$opponent is protected by Driving Ace. Hazard not applied."
         };
     }
 }
 
 sub play_flat_tire {
-    my ($player, $choice) = @_;
-    my $opponent = ($player eq 'Player 1') ? 'Player 2' : 'Player 1';
+    my ( $player, $choice ) = @_;
+    my $opponent = ( $player eq 'Player 1' ) ? 'Player 2' : 'Player 1';
 
-    unless ( grep { $_ eq 'Puncture-Proof' } @{ $players{$opponent}{safety} } ) {
+    unless ( grep { $_ eq 'Puncture-Proof' }
+        @{ $players{$opponent}{safety} } )
+    {
         push @{ $players{$opponent}{hazards} }, 'Flat Tire';
         $players{$opponent}{can_move} = 0;
         $game->pick( $player => 'discard', [ $choice - 1 ] );
@@ -655,14 +659,15 @@ sub play_flat_tire {
     else {
         return {
             success => 0,
-            message => "$opponent is protected by Puncture-proof. Hazard not applied."
+            message =>
+                "$opponent is protected by Puncture-proof. Hazard not applied."
         };
     }
 }
 
 sub play_out_of_gas {
-    my ($player, $choice) = @_;
-    my $opponent = ($player eq 'Player 1') ? 'Player 2' : 'Player 1';
+    my ( $player, $choice ) = @_;
+    my $opponent = ( $player eq 'Player 1' ) ? 'Player 2' : 'Player 1';
 
     unless ( grep { $_ eq 'Extra Tank' } @{ $players{$opponent}{safety} } ) {
         push @{ $players{$opponent}{hazards} }, 'Out of Gas';
@@ -676,22 +681,24 @@ sub play_out_of_gas {
     else {
         return {
             success => 0,
-            message => "$opponent is protected by Extra Tank. Hazard not applied."
+            message =>
+                "$opponent is protected by Extra Tank. Hazard not applied."
         };
     }
 }
 
 sub play_speed_limit {
-    my ($player, $choice) = @_;
-    my $opponent = ($player eq 'Player 1') ? 'Player 2' : 'Player 1';
-    if (grep { $_ eq 'Speed Limit' } @{ $players{$opponent}{hazards} }) {
+    my ( $player, $choice ) = @_;
+    my $opponent = ( $player eq 'Player 1' ) ? 'Player 2' : 'Player 1';
+    if ( grep { $_ eq 'Speed Limit' } @{ $players{$opponent}{hazards} } ) {
         return {
             success => 0,
             message => "$opponent already has a Speed Limit hazard."
         };
     }
 
-    unless ( grep { $_ eq 'Right of Way' } @{ $players{$opponent}{safety} } ) {
+    unless ( grep { $_ eq 'Right of Way' } @{ $players{$opponent}{safety} } )
+    {
         push @{ $players{$opponent}{hazards} }, 'Speed Limit';
         $game->pick( $player => 'discard', [ $choice - 1 ] );
         return {
@@ -702,16 +709,18 @@ sub play_speed_limit {
     else {
         return {
             success => 0,
-            message => "$opponent is protected by Right of Way. Speed Limit not applied."
+            message =>
+                "$opponent is protected by Right of Way. Speed Limit not applied."
         };
     }
 }
 
 sub play_stop {
-    my ($player, $choice) = @_;
-    my $opponent = ($player eq 'Player 1') ? 'Player 2' : 'Player 1';
+    my ( $player, $choice ) = @_;
+    my $opponent = ( $player eq 'Player 1' ) ? 'Player 2' : 'Player 1';
 
-    unless ( grep { $_ eq 'Right of Way' } @{ $players{$opponent}{safety} } ) {
+    unless ( grep { $_ eq 'Right of Way' } @{ $players{$opponent}{safety} } )
+    {
         push @{ $players{$opponent}{hazards} }, 'Stop';
         $players{$opponent}{can_move} = 0;
         $game->pick( $player => 'discard', [ $choice - 1 ] );
@@ -723,7 +732,8 @@ sub play_stop {
     else {
         return {
             success => 0,
-            message => "$opponent is protected by Right of Way. Stop not applied."
+            message =>
+                "$opponent is protected by Right of Way. Stop not applied."
         };
     }
 }
