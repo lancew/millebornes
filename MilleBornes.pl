@@ -217,17 +217,13 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Gasoline' ) {
-            if ( grep { $_ eq 'Out of Gas' } @{ $players{$player}{hazards} } )
-            {
-                @{ $players{$player}{hazards} } = grep { $_ ne 'Out of Gas' }
-                    @{ $players{$player}{hazards} };
-                $players{$player}{can_move} = 0;
-                $message = "$player has refueled their car and can now move!";
-                $game->pick( $player => 'discard', [ $choice - 1 ] );
+            my $result = play_gasoline($player, $choice);
+            if ( $result->{success} ) {
+                $message = $result->{message};
                 goto SKIP_TO_THE_END;
             }
             else {
-                $message = "You don't need Gasoline right now.";
+                $message = $result->{message};
                 goto DISPLAY;
             }
         }
@@ -591,6 +587,26 @@ sub play_spare_tire {
         return {
             success => 0,
             message => "You don't have a Flat Tire to fix."
+        };
+    }
+}
+
+sub play_gasoline {
+    my ($player, $choice) = @_;
+
+    if ( grep { $_ eq 'Out of Gas' } @{ $players{$player}{hazards} } ) {
+        @{ $players{$player}{hazards} } = grep { $_ ne 'Out of Gas' }
+            @{ $players{$player}{hazards} };
+        $game->pick( $player => 'discard', [ $choice - 1 ] );
+        return {
+            success => 1,
+            message => "$player has refueled their car and can now move!"
+        };
+    }
+    else {
+        return {
+            success => 0,
+            message => "You don't need Gasoline right now."
         };
     }
 }
