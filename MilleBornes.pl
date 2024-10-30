@@ -127,24 +127,26 @@ while ( !$game_over ) {
             }
         }
 
-        if ( $played_card eq 'Stop' || $played_card eq 'Speed Limit' ) {
-            unless ( grep { $_ eq 'Right of Way' }
-                @{ $players{$opponent}{safety} } )
-            {
-                push @{ $players{$opponent}{hazards} }, $played_card;
-                $players{$opponent}{can_move} = 0
-                    if $played_card eq 'Stop';
-                $game->pick( $player => 'discard', [ $choice - 1 ] );
-
-                $message = "$opponent has been stopped."
-                    if $played_card eq 'Stop';
-                $message = "$opponent has been slowed by Speed Limit."
-                    if $played_card eq 'Speed Limit';
+        if ( $played_card eq 'Stop' ) {
+            my $result = play_stop($player, $choice);
+            if ( $result->{success} ) {
+                $message = $result->{message};
                 goto SKIP_TO_THE_END;
             }
             else {
-                $message
-                    = "$opponent is protected by Right of Way. Hazard not applied.\n";
+                $message = $result->{message};
+                goto DISPLAY;
+            }
+        }
+
+        if ( $played_card eq 'Speed Limit' ) {
+            my $result = play_speed_limit($player, $choice);
+            if ( $result->{success} ) {
+                $message = $result->{message};
+                goto SKIP_TO_THE_END;
+            }
+            else {
+                $message = $result->{message};
                 goto DISPLAY;
             }
         }
@@ -672,6 +674,47 @@ sub play_out_of_gas {
         return {
             success => 0,
             message => "$opponent is protected by Extra Tank. Hazard not applied."
+        };
+    }
+}
+
+sub play_speed_limit {
+    my ($player, $choice) = @_;
+    my $opponent = ($player eq 'Player 1') ? 'Player 2' : 'Player 1';
+
+    unless ( grep { $_ eq 'Right of Way' } @{ $players{$opponent}{safety} } ) {
+        push @{ $players{$opponent}{hazards} }, 'Speed Limit';
+        $game->pick( $player => 'discard', [ $choice - 1 ] );
+        return {
+            success => 1,
+            message => "$opponent has been slowed by Speed Limit."
+        };
+    }
+    else {
+        return {
+            success => 0,
+            message => "$opponent is protected by Right of Way. Speed Limit not applied."
+        };
+    }
+}
+
+sub play_stop {
+    my ($player, $choice) = @_;
+    my $opponent = ($player eq 'Player 1') ? 'Player 2' : 'Player 1';
+
+    unless ( grep { $_ eq 'Right of Way' } @{ $players{$opponent}{safety} } ) {
+        push @{ $players{$opponent}{hazards} }, 'Stop';
+        $players{$opponent}{can_move} = 0;
+        $game->pick( $player => 'discard', [ $choice - 1 ] );
+        return {
+            success => 1,
+            message => "$opponent has been stopped."
+        };
+    }
+    else {
+        return {
+            success => 0,
+            message => "$opponent is protected by Right of Way. Stop not applied."
         };
     }
 }
