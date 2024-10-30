@@ -313,16 +313,13 @@ while ( !$game_over ) {
         }
 
         if ( $played_card eq 'Extra Tank' ) {
-            if ( !grep { $_ eq 'Extra Tank' } @{ $players{$player}{safety} } )
-            {
-                push @{ $players{$player}{safety} }, 'Extra Tank';
-                $message
-                    = "$player is now protected against running Out of Gas!";
-                $game->pick( $player => 'discard', [ $choice - 1 ] );
+            my $result = play_extra_tank($player, $choice);
+            if ( $result->{success} ) {
+                $message = $result->{message};
                 goto SKIP_TO_THE_END;
             }
             else {
-                $message = "You already have the Extra Tank safety card.";
+                $message = $result->{message};
                 goto DISPLAY;
             }
         }
@@ -497,6 +494,29 @@ sub play_puncture_proof {
         return {
             success => 0,
             message => "You already have the Puncture-Proof safety card."
+        };
+    }
+}
+
+sub play_extra_tank {
+    my ( $player, $choice ) = @_;
+
+    if ( !grep { $_ eq 'Extra Tank' } @{ $players{$player}{safety} } ) {
+        push @{ $players{$player}{safety} }, 'Extra Tank';
+        # Remove Out of Gas hazard if present
+        @{ $players{$player}{hazards} }
+            = grep { $_ ne 'Out of Gas' } @{ $players{$player}{hazards} };
+            
+        $game->pick( $player => 'discard', [ $choice - 1 ] );
+        return {
+            success => 1,
+            message => "$player is now protected against running Out of Gas!"
+        };
+    }
+    else {
+        return {
+            success => 0,
+            message => "You already have the Extra Tank safety card."
         };
     }
 }
