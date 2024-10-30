@@ -351,7 +351,10 @@ sub display_progress_bar {
     else {
         $move_indicator .= ' ';
     }
-    if ( grep { $_ ne 'Speed Limit' } @{ $players{$player}{hazards} } ) {
+    if ( grep { $_ eq 'Out of Gas' } @{ $players{$player}{hazards} } ) {
+        $move_indicator .= '⛽';
+    }
+    elsif ( grep { $_ ne 'Speed Limit' } @{ $players{$player}{hazards} } ) {
         $move_indicator .= '⚠️';
     }
     else {
@@ -681,6 +684,12 @@ sub play_out_of_gas {
 sub play_speed_limit {
     my ($player, $choice) = @_;
     my $opponent = ($player eq 'Player 1') ? 'Player 2' : 'Player 1';
+    if (grep { $_ eq 'Speed Limit' } @{ $players{$opponent}{hazards} }) {
+        return {
+            success => 0,
+            message => "$opponent already has a Speed Limit hazard."
+        };
+    }
 
     unless ( grep { $_ eq 'Right of Way' } @{ $players{$opponent}{safety} } ) {
         push @{ $players{$opponent}{hazards} }, 'Speed Limit';
